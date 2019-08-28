@@ -159,6 +159,11 @@ public class WindowWidget extends UIWidget implements SessionChangeListener,
         mHandle = ((WidgetManagerDelegate)aContext).newWidgetHandle();
         mWidgetPlacement = new WidgetPlacement(aContext);
         initializeWidgetPlacement(mWidgetPlacement);
+        if (mSessionStack.isPrivateMode()) {
+            mWidgetPlacement.clearColor = ViewUtils.ARGBtoRGBA(getContext().getColor(R.color.window_private_clear_color));
+        } else {
+            mWidgetPlacement.clearColor = ViewUtils.ARGBtoRGBA(getContext().getColor(R.color.window_blank_clear_color));
+        }
 
         mTopBar = new TopBarWidget(aContext);
         mTopBar.attachToWindow(this);
@@ -767,12 +772,12 @@ public class WindowWidget extends UIWidget implements SessionChangeListener,
 
     @Override
     public void setFirstDraw(final boolean aIsFirstDraw) {
-        mWidgetPlacement.firstDraw = aIsFirstDraw;
+        mWidgetPlacement.composited = aIsFirstDraw;
     }
 
     @Override
     public boolean getFirstDraw() {
-        return mWidgetPlacement.firstDraw;
+        return mWidgetPlacement.composited;
     }
 
     @Override
@@ -1280,7 +1285,10 @@ public class WindowWidget extends UIWidget implements SessionChangeListener,
         if (mFirstDrawCallback != null) {
             // Post this call because running it synchronously can cause a deadlock if the runnable
             // resizes the widget and calls surfaceChanged. See https://github.com/MozillaReality/FirefoxReality/issues/1459.
-            ThreadUtils.postToUiThread(mFirstDrawCallback);
+            // 1s delay has been added because firstComposite callback is received before a Gecko layer is actually rendered
+            // and that makes the window transparent for a while. Remove the 1s delay when GV is updated with a better callback.
+            final int delay = 1000;
+            ThreadUtils.postDelayedToUiThread(mFirstDrawCallback, delay);
             mFirstDrawCallback = null;
         }
     }

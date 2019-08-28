@@ -53,13 +53,14 @@ WidgetPlacement::FromJava(JNIEnv* aEnv, jobject& aObject) {
   GET_BOOLEAN_FIELD(visible);
   GET_BOOLEAN_FIELD(opaque);
   GET_BOOLEAN_FIELD(showPointer);
-  GET_BOOLEAN_FIELD(firstDraw);
+  GET_BOOLEAN_FIELD(composited);
   GET_BOOLEAN_FIELD(layer);
   GET_BOOLEAN_FIELD(proxifyLayer);
   GET_FLOAT_FIELD(textureScale, "textureScale");
   GET_BOOLEAN_FIELD(cylinder);
   GET_FLOAT_FIELD(cylinderMapRadius, "cylinderMapRadius");
   GET_INT_FIELD(borderColor);
+  GET_INT_FIELD(clearColor);
 
   return result;
 }
@@ -77,6 +78,11 @@ WidgetPlacement::GetTextureWidth() const{
 int32_t
 WidgetPlacement::GetTextureHeight() const {
   return (int32_t)ceilf(height * density * textureScale);
+}
+
+vrb::Color
+WidgetPlacement::GetClearColor() const {
+  return vrb::Color(clearColor);
 }
 
 }
